@@ -5,6 +5,8 @@ from collections import defaultdict
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.cross_validation import cross_val_score
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.grid_search import GridSearchCV
 
 
 data_filename ="datas/201311.csv"
@@ -88,7 +90,7 @@ for index, row in dataset.iterrows():
 X_lastwinner = dataset[["HomeTeamRanksHigher", "HomeTeamWonLast"]].values
 clf2 = DecisionTreeClassifier(random_state=14)
 scores2 = cross_val_score(clf2, X_lastwinner, y_true, scoring='accuracy')
-#print("Accuracy2: {0:.1f%}".format(np.mean(scores2)*100))
+print("Accuracy_2: {0:.1f}%".format(np.mean(scores2)*100 ))
 
 encoding = LabelEncoder()
 encoding.fit(dataset["Home Team"].values)
@@ -97,7 +99,28 @@ visitor_teams = encoding.transform(dataset["Visitor Team"].values)
 X_teams = np.vstack([home_teams, visitor_teams]).T
 
 onehot = OneHotEncoder()
-X_teams_expanded = onehot.fit_transform(X_teams).todense
+X_teams_expanded = onehot.fit_transform(X_teams).todense()
 clf3 = DecisionTreeClassifier(random_state=14)
 scores3 = cross_val_score(clf3, X_teams_expanded, y_true, scoring='accuracy')
-print("Accuracy3: {0:.1f%}".format(np.mean(scores3)*100))
+print("Accuracy_3: {0:.1f}%".format(np.mean(scores3)*100))
+
+
+clf4 = RandomForestClassifier(random_state=14)
+scores4 = cross_val_score(clf4, X_teams, y_true, scoring='accuracy')
+print("Accuracy_4: {0:.1f}%".format(np.mean(scores4)*100 ))
+
+X_all = np.hstack([X_lastwinner, X_teams])
+clf5 = RandomForestClassifier(random_state=14)
+scores5 = cross_val_score(clf5, X_all, y_true, scoring='accuracy')
+print("Accuracy_5: {0:.1f}%".format(np.mean(scores5)*100 ))
+
+parameter_space = {
+    "max_features": [2, 10, 'auto'],
+    "n_estimators": [100,],
+    "criterion": ["gini", "entropy"],
+    "min_samples_leaf": [2, 4, 6],
+    }
+clf6 = RandomForestClassifier(random_state=14)
+grid = GridSearchCV(clf6, parameter_space)
+grid.fit(X_all, y_true)
+print("Accuracy_6: {0:.1f}%".format(grid.best_score_ * 100))
