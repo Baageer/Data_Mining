@@ -10,7 +10,8 @@ index = 0
 for file in os.listdir(datas_path):
     data_filename = os.path.join(datas_path, file)
     dataset = pd.read_csv(data_filename, parse_dates=[0])
-    if index==0 :
+    #如果是第一个文件 写入header标题，如果不是 不写入header
+    if index==0 :   
         dataset.to_csv(datas_path+'.csv',index=False,mode='a+')
     else:
         dataset.to_csv(datas_path+'.csv',index=False,mode='a+',header=False)
