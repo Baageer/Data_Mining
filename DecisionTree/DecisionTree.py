@@ -1,6 +1,7 @@
 from CSTree import CSNode, CSTree
 from collections import Counter
 import numpy as np
+import queue
 class DecisionTreeClassifier(object):
     def __init__(self, datas, attributes):
         self.datas = datas
@@ -8,7 +9,7 @@ class DecisionTreeClassifier(object):
         self.root=None
 
     def is_same_class(self, datas, attributes):
-        print(datas)
+        #print(datas)
         temp = datas[0][-1]
         for data in datas:
             if data[-1] != temp:
@@ -16,7 +17,7 @@ class DecisionTreeClassifier(object):
         return temp
 
     def is_same_attribute(self, datas, attributes):
-        print(attributes)
+        #print(attributes)
         temp_p = []
         for date in datas:
             temp_p.append(date[0])
@@ -47,7 +48,7 @@ class DecisionTreeClassifier(object):
         for i in range(class_count):
             ent_d_v = -( num_count[i]/sum_count * np.log2(num_count[i]/sum_count) )
             ent_d += ent_d_v
-        print('ent_d:', ent_d)
+        #print('ent_d:', ent_d)
             
         ent_attribute = []
         best_attri = attributes[0]
@@ -81,13 +82,13 @@ class DecisionTreeClassifier(object):
 
     def tree_generate(self, datas, attributes):
         node = CSNode()
-        print('2', node)
+        #print('2', node)
         #print(root, root.data, root.firstchild, root.nextsibling)
         class_result = self.is_same_class(datas, attributes)
         if class_result != False:
             node.firstchild = None
             node.data = class_result
-            print('3', node)
+            #print('3', node)
             return node
         
         is_same = self.is_same_attribute(datas, attributes)
@@ -95,21 +96,21 @@ class DecisionTreeClassifier(object):
         if len(attributes)==0 or is_same:            
             node.firstchild = None
             node.data = class_result
-            print('4', node)
+            #print('4', node)
             return node
         
         best_attri, best_attri_count = self.best_attribute(datas, attributes, count)
 
         for samp in best_attri_count.keys():
             d_v = [data for data in datas if data[best_attri]==samp]
-            print(d_v)
+            #print(d_v)
             node_v = CSNode()
             if len(d_v)==0 :
                 node_v.firstchild =None
                 node_v.nextsibling = None
                 node_v.data = class_result
             else:
-                print(attributes,best_attri)
+                #print(attributes,best_attri)
                 temp_list = attributes.copy()
                 temp_list.remove(best_attri)
                 node_v = self.tree_generate(d_v, temp_list)
@@ -121,7 +122,7 @@ class DecisionTreeClassifier(object):
             else:
                 node.firstchild.nextsibling = node_v
                 
-        print(node)
+        #print(node)
         return node
 
 def visit_func(node_t):
@@ -133,6 +134,36 @@ def preorder_traverse(node_t, visit_func):
         preorder_traverse(node_t.firstchild, visit_func)
         preorder_traverse(node_t.nextsibling, visit_func)
 
+def printTreeB(node_t):
+    if (node_t is None):
+        print ("Empty")
+        return 0
+    top = []
+    bottom = []
+    bottom.append(node_t)
+    n = 1
+
+    while len(top)!=0 or len(bottom)!=0 :
+        #print(n)
+        if len(bottom)!=0:
+            b = bottom.pop()
+            print("+"+"-"*n, b.data)
+            n += 3
+            if b.firstchild is not None:
+                bottom.append(b.firstchild)
+                
+                
+            top.append(b)
+            #print('j: ',len(top))
+
+        else:
+            t = top.pop()
+            n -= 3
+            if t.nextsibling is not None:
+                #print('i: ', len(top), ' ' ,t.data ,' ', t.nextsibling.data)
+                bottom.append(t.nextsibling)
+    
+
 
 if __name__ == '__main__':
     clf = DecisionTreeClassifier([[0,1,0,1],[1,0,0,-1],[0,0,1,1],[0,0,0,-1]],
@@ -140,3 +171,5 @@ if __name__ == '__main__':
     node = clf.tree_generate([[0,1,0,1],[1,0,0,-1],[0,0,1,1],[0,0,0,-1]],
                                  [0,1,2])
     #preorder_traverse(node, visit_func)
+    
+    printTreeB(node)
