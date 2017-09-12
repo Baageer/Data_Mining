@@ -6,9 +6,17 @@ def sigmoid(in_data):
 def feedforward(in_data, weight, bias):
     return sigmoid(np.dot(weight.T, in_data) + b)
 
-def backward(x, r_y, c_y, w, b, learn_rate=0.1):
+def backward_o(x, r_y, c_y, w, b, learn_rate=0.1):
     gradient_w = learn_rate * c_y * (1-c_y) * (c_y-r_y) * x
     gradient_b = learn_rate * c_y * (1-c_y) * (c_y-r_y)
+    w = w - gradient_w
+    b = b - gradient_b
+    sigma = c_y * (1-c_y) * (c_y-r_y) *w
+    return w,b,sigma
+
+def backward_h(x, r_y, c_y, w, b, sigma, learn_rate=0.1):
+    gradient_w = learn_rate * c_y * (1-c_y) * sigma * x
+    gradient_b = learn_rate * c_y * (1-c_y) * sigma
     w = w - gradient_w
     b = b - gradient_b
     return w,b
@@ -27,6 +35,6 @@ for i in range(1000):
         input2hidden_y = feedforward(X[j], w1, b1)
         hidden2output_y = feedforward(input2hidden_y, w2 ,b2)
 
-        w2, b2 = backward(input2hidden_y, Y[j], hidden2output_y, w2, b2)
-        w1, b1 = backward(X[J], Y[j], input2hidden_y, w1, b1)
+        w2, b2, sigma = backward_o(input2hidden_y, Y[j], hidden2output_y, w2, b2)
+        w1, b1 = backward(X[J], Y[j], input2hidden_y, w1, b1, sigma)
         
